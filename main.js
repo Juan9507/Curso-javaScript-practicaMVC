@@ -50,21 +50,47 @@
    * @param {*} board - recide el board
    */
   self.Ball = function (x, y, radius, board) {
-    this.x = x;
-    this.y = y;
-    this.radius = radius;
-    this.board = board;
+    this.x = x; //Coordenada x
+    this.y = y; //Coordenada y
+    this.radius = radius; //Radio de la pelota
+    this.board = board; //board
     this.speed_y = 0; //Velocidad en la cordenada y
     this.speed_x = 3; //Velocidad en la cordenada y
     this.board.ball = this; // le decimos a board que la pelota es this, asignamos al objeto ball
-    this.kind = "circle";
+    this.kind = "circle"; // lo que se va a dibujar
     this.direction = 1; //Direccion de la pelota
+    this.bounce_angle = 0;
+    this.max_bounce_angle = Math.PI / 12;
+    this.speed = 3;
   };
 
   self.Ball.prototype = {
+    /**
+     * Metodo para cambiar de dirección la pelota
+     */
     move: function () {
       this.x += this.speed_x * this.direction;
       this.y += this.speed_y;
+    },
+    get width() {
+      return this.radius * 2; //Devuelve el diametro
+    },
+    get height() {
+      return this.radius * 2; //Devuelve el diametro
+    },
+    /**
+     * Reaccion a la colisión con una barra y cambiar el angulo de rebote
+     * de la pelota
+     * @param {*} bar - recibe la barra
+     */
+    collision: function (bar) {
+      var relative_intersect_y = bar.y + bar.height / 2 - this.y;
+      var normalized_intersect_y = relative_intersect_y / (bar.height / 2);
+      this.bounce_angle = normalized_intersect_y * this.max_bounce_angle;
+      this.speed_y = this.speed * Math.sin(this.bounce_angle);
+      this.speed_x = this.speed * Math.cos(this.bounce_angle);
+      if (this.x > this.board.width / 2) this.direction = -1;
+      else this.direction = 1;
     },
   };
 })();
@@ -144,6 +170,20 @@
         draw(this.ctx, el); //Se le pasa el contexto y el elemento que va a dibujar
       }
     },
+
+    /**
+     * Recorremos las barras para darnos cuenta si alguna esta colisionando
+     */
+    check_collisions: function () {
+      for (var index = this.board.bars.length - 1; index >= 0; index--) {
+        var bar = this.board.bars[index];
+        //Saber si colisionan
+        if (hit(bar, this.board.ball)) {
+          this.board.ball.collision(bar);
+        }
+      }
+    },
+
     /**
      * Metodo para iniciar el juego
      */
@@ -151,10 +191,35 @@
       if (this.board.playing) {
         this.clean();
         this.draw();
+        this.check_collisions();
         this.board.ball.move();
       }
     },
   };
+
+  /**
+   * Metodo para revisar si a colisiona con b
+   * @param {*} a
+   * @param {*} b
+   */
+  function hit(a, b) {
+    //Revisa si a colisiona con b
+    var hit = false;
+    //Colisiones horizontales
+    if (b.x + b.width >= a.x && b.x < a.x + a.width) {
+      //Colisiones verticales
+      if (b.y + b.height >= a.y && b.y < a.y + a.height) hit = true;
+    }
+    //Colision de a con b
+    if (b.x <= a.x && b.x + b.width >= a.x + a.width) {
+      if (b.y <= a.y && b.y + b.height >= a.y + a.height) hit = true;
+    }
+    //Colision b con a
+    if (a.x <= b.x && a.x + a.width >= b.x + b.width) {
+      if (a.y <= b.y && a.y + a.height >= b.y + b.height) hit = true;
+    }
+    return hit;
+  }
 
   /**
    * Funcion draw para dibujar
