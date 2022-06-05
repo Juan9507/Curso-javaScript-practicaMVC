@@ -57,19 +57,27 @@
     this.width = width; //Ancho
     this.height = height; //Alto
     this.board = board; //Tablero
-
     this.board.bars.push(this); // Agregando al tablero las barras laterales
-
     this.kind = "rectangle"; // Atributo para saber lo que se va a dibujar para que canvas sepa que dibuja
+    this.speed = 10; // Velocidad para mover las barras
   };
 
   /**
    * Modificación del prototipo de la clase para colocar los metodos de la misma
+   * Metodos para mover las barras
    */
   self.Bar.prototype = {
-    //Declaracion de metodos para despues implementarlas
-    down: function () {},
-    up: function () {},
+    down: function () {
+      //Movernos para abajo
+      this.y += this.speed;
+    },
+    up: function () {
+      // Movernos hacia abajo
+      this.y -= this.speed;
+    },
+    toString: function () {
+      return `x: ${this.x} y: ${this.y}`;
+    },
   };
 })();
 /**
@@ -118,17 +126,29 @@
   }
 })();
 
+var board = new Board(800, 400); //Creando un objeto de la clase board
+var bar = new Bar(20, 100, 40, 100, board); // Creando un objeto de la clase bar
+var bar2 = new Bar(735, 100, 40, 100, board); // Creando un objeto de la clase bar
+var canvas = document.querySelector("#canvas"); //Seleccionar el elemento canvas
+var board_view = new BoardView(canvas, board); //Creando un objeto de la clase boardView
+
+/**
+ * Escuchar cuando pulsan una tecla para saber el evento a lanzar
+ */
+document.addEventListener("keydown", function (ev) {
+  if (ev.key == "ArrowUp") {
+    bar.up();
+  } else if (ev.key == "ArrowDown") {
+    bar.down();
+  }
+  console.log(bar.toString());
+});
+
 window.addEventListener("load", main);
 
 /**
  * Function main para ejecutar todos los elementos
  */
 function main() {
-  var board = new Board(800, 400); //Creando un objeto de la clase board
-  var bar = new Bar(20, 100, 40, 100, board); // Creando un objeto de la clase bar
-  var bar2 = new Bar(735, 100, 40, 100, board); // Creando un objeto de la clase bar
-  var canvas = document.querySelector("#canvas"); //Seleccionar el elemento canvas
-  var board_view = new BoardView(canvas, board); //Creando un objeto de la clase boardView
-
   board_view.draw();
 }
