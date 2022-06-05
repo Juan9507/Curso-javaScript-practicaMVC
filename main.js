@@ -23,6 +23,7 @@
     this.game_over = false; //Fin del juego
     this.bars = []; // Barra de las orillas del juego
     this.ball = null; // Pelota
+    this.playing = false; //Jugando
   };
 
   /**
@@ -31,7 +32,7 @@
   self.Board.prototype = {
     get elements() {
       //Modificar los metodos de las clases
-      var elements = this.bars; // Barra laterales del juego
+      var elements = this.bars.slice(); // Barra laterales del juego
       elements.push(this.ball); // Agregar una pelota
       return elements; // Retorna todos los elementos que hay en el tablero.
     },
@@ -55,8 +56,16 @@
     this.board = board;
     this.speed_y = 0; //Velocidad en la cordenada y
     this.speed_x = 3; //Velocidad en la cordenada y
-    board.ball = this; // le decimos a board que la pelota es this, asignamos al objeto ball
+    this.board.ball = this; // le decimos a board que la pelota es this, asignamos al objeto ball
     this.kind = "circle";
+    this.direction = 1; //Direccion de la pelota
+  };
+
+  self.Ball.prototype = {
+    move: function () {
+      this.x += this.speed_x * this.direction;
+      this.y += this.speed_y;
+    },
   };
 })();
 
@@ -139,8 +148,11 @@
      * Metodo para iniciar el juego
      */
     play: function () {
-      this.clean();
-      this.draw();
+      if (this.board.playing) {
+        this.clean();
+        this.draw();
+        this.board.ball.move();
+      }
     },
   };
 
@@ -180,19 +192,26 @@ var ball = new Ball(350, 100, 10, board);
  * Escuchar cuando pulsan una tecla para saber el evento a lanzar
  */
 document.addEventListener("keydown", function (ev) {
-  ev.preventDefault();
   if (ev.key == "ArrowUp") {
+    ev.preventDefault();
     bar.up();
-  } else if (ev.key == "ArrowDown") {
+  } else if (ev.key === "ArrowDown") {
+    ev.preventDefault();
     bar.down();
-  } else if (ev.key == "w") {
+  } else if (ev.key === "w") {
+    ev.preventDefault();
     bar_2.up();
-  } else if (ev.key == "s") {
+  } else if (ev.key === "s") {
+    ev.preventDefault();
     bar_2.down();
+  } else if (ev.key === " ") {
+    ev.preventDefault();
+    board.playing = !board.playing;
   }
   console.log(bar.toString());
 });
 
+board_view.draw();
 window.requestAnimationFrame(controller); // los frames del juego
 
 /**
