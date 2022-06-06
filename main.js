@@ -257,16 +257,16 @@ var ball = new Ball(350, 100, 10, board);
  * Escuchar cuando pulsan una tecla para saber el evento a lanzar
  */
 document.addEventListener("keydown", function (ev) {
-  if (ev.key == "ArrowUp") {
+  if (ev.key == "w") {
     ev.preventDefault();
     bar.up();
-  } else if (ev.key === "ArrowDown") {
+  } else if (ev.key === "s") {
     ev.preventDefault();
     bar.down();
-  } else if (ev.key === "w") {
+  } else if (ev.key === "ArrowUp") {
     ev.preventDefault();
     bar_2.up();
-  } else if (ev.key === "s") {
+  } else if (ev.key === "ArrowDown") {
     ev.preventDefault();
     bar_2.down();
   } else if (ev.key === " ") {
